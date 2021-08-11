@@ -1,0 +1,56 @@
+# tye application configuration file
+# read all about it at https://github.com/dotnet/tye
+#
+# when you've given us a try, we'd love to know what you think:
+#    https://aka.ms/AA7q20u
+#
+name: integral
+extensions:
+  - name: dapr
+    components-path: "./dapr_components/"
+    config: claptrap_config
+    exclude-placement-container: true
+    placement-port: 6050
+  - name: zipkin
+services:
+  - name: integral-webapi
+    project: Services.IntergralServer/Services.IntergralServer.csproj
+  - name: integral-backendserver
+    project: Integral.BackendServer/Integral.BackendServer.csproj
+  # - name: mongo
+  #   image: mongo
+  #   bindings:
+  #     - name: mongodb
+  #       containerPort: 27017
+  #       connectionString: mongodb://${env:MONGO_INITDB_ROOT_USERNAME}:${env:MONGO_INITDB_ROOT_PASSWORD}@${host}:${containerPort}/claptrap?authSource=admin
+  #   env:
+  #     - name: MONGO_INITDB_ROOT_USERNAME
+  #       value: root
+  #     - name: MONGO_INITDB_ROOT_PASSWORD
+  #       value: claptrap
+  # - name: mongo-express
+  #   image: mongo-express
+  #   bindings:
+  #     - name: mongodb
+  #       port: 58081
+  #       containerPort: 8081
+  #       protocol: http
+  #   env:
+  #     - name: MONGO_INITDB_ROOT_USERNAME
+  #       value: root
+  #     - name: MONGO_INITDB_ROOT_PASSWORD
+  #       value: claptrap
+  - name: zipkin
+    external: true
+    bindings:
+      - name: http
+        port: 9411
+ingress:
+  - name: webapi
+    rules:
+      - service: integral-webapi
+        path: /
+    bindings:
+      - name: webapi
+        protocol: https
+        port: 36524

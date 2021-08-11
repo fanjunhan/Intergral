@@ -1,0 +1,31 @@
+version: '3.4'
+
+services:
+  integral.backendserver:
+    image: ${DOCKER_REGISTRY-}integralbackendserver
+    build:
+      context: .
+      dockerfile: Integral.BackendServer/Dockerfile
+    ports:
+      - "52000:50001"
+  daprbackend-dapr:
+    image: "daprio/daprd:latest"
+    command: [ "./daprd", "-app-id", "daprbackend", "-app-port", "80" ]
+    depends_on:
+      - integral.backendserver
+    network_mode: "service:daprbackend"
+    
+  services.intergralserver:
+    image: ${DOCKER_REGISTRY-}servicesintergralserver
+    build:
+      context: .
+      dockerfile: Services.IntergralServer/Dockerfile 
+    ports:
+      - "51000:50001"      
+  daprfrontend-dapr:
+    image: "daprio/daprd:latest"
+    command: [ "./daprd", "-app-id", "daprfrontend", "-app-port", "80" ]
+    depends_on:
+      - services.intergralserver
+    network_mode: "service:daprfrontend"
+
