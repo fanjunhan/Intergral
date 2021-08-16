@@ -10,7 +10,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
-using YLH.Infrasturecture.Dapper;
+using System.Data;
+using Services.IntergralServer.DapperPlus;
+using MySql.Data.MySqlClient;
+using Npgsql;
 
 namespace Services.IntergralServer
 {
@@ -26,11 +29,11 @@ namespace Services.IntergralServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDapper("Default", option =>
-            {
-                option.ConnectionString = Configuration.GetSection("IntegralConnectionString").Value;
-                option.DbType = DbStoreType.MySql;
-            });
+            services.AddScoped<IDbConnection, MySqlConnection>();
+            services.AddScoped<IDbConnection, NpgsqlConnection>();
+            services.AddScoped<IDapperPlusRead, DapperPlusRead>();
+            services.AddScoped<IDapperPlusWrite, DapperPlusWrite>();
+
             services.AddSingleton<IIntegralConfigStore, IntegralConfigStore>();
 
             services.AddControllers().AddJsonOptions(options =>
@@ -46,11 +49,6 @@ namespace Services.IntergralServer
                     IncludeFields=true
                 })); 
             services.AddActors(_ => { });
-/*            services.AddSingleton(new JsonSerializerOptions()
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNameCaseInsensitive = true,
-            });*/
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Integral.WebApi", Version = "v1" });
